@@ -6,13 +6,26 @@ export class Chromosome{
   genes: Gene[];
   id: string = this.createUniqueId();
 
-  constructor(label?: string | number, recombination = true) {
+  constructor(genes : Gene[], label?: string | number, recombination = true) {
     this.label = label;
+    this.genes = genes;
     this.recombination = recombination;
   }
 
-  recombine(){
-    console.log('recombine');
+  recombine(chromatid : Chromosome){
+    if(this.recombination){
+      let babyGenes = [];
+      for(let i in chromatid.genes){
+        if(0 < (Math.random() - .5)){
+          babyGenes.push(JSON.parse(JSON.stringify(chromatid.genes[i])));
+        }else{
+          babyGenes.push(JSON.parse(JSON.stringify(this.genes[i])));
+        }
+      }
+      return new Chromosome(babyGenes, (this.label))
+    }else {
+      return this;
+    }
   }
 
   createUniqueId(){

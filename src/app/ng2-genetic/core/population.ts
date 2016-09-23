@@ -2,13 +2,15 @@ import { Specimen } from './';
 
 export class Population{
   generation: number = 0;
+  maxMembers : number;
   members : Specimen[];
   fitnessFunction : Function;
   survivalRatio : number;
   crossoverRatio : number;
+  mutationRatio : number;
   optimizeMax : boolean;
 
-  constructor(members : Specimen[], fitnessFunction : Function, survivalRatio = 0.5, optimizeMax = true){
+  constructor(members : Specimen[], fitnessFunction : Function, maxMembers = 100, survivalRatio = 0.5, mutationRatio = 0.2, crossoverRatio = 0.5, optimizeMax = true){
     this.members = members;
     this.fitnessFunction = fitnessFunction;
     this.survivalRatio = survivalRatio;
@@ -21,8 +23,6 @@ export class Population{
     delete this.members;
     this.members = survivors;
   }
-
-
 
   // Calculates & Sorts each members' fitness
   populationFitness(){
@@ -38,6 +38,15 @@ export class Population{
     }));
   }
 
+  populationCrossover(){
+    let topSpecimen = Math.floor(this.crossoverRatio * this.members.length);
+    while(this.members.length < this.maxMembers){
+      for(let i = 0; i < topSpecimen; i++){
+        this.members.push(this.memberCrossover(this.members[i], this.members[0]));
+      }
+    }
+  }
+
   // Calculates a member's fitness
   memberFitness(member : Specimen){
     member.fitness = this.fitnessFunction(member);
@@ -45,9 +54,12 @@ export class Population{
   }
 
   memberCrossover(mother : Specimen, father : Specimen){
-    
+    let offspringDNA = [];
+    for(let i in father.dna){
+      offspringDNA.push(father.dna[i].recombine(mother.dna[i]));
+    }
+    return new Specimen(offspringDNA);
   }
-
 
   // Exports Generation
   export(){
