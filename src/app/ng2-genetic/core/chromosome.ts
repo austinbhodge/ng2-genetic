@@ -1,5 +1,5 @@
 import { Gene } from './';
-
+import * as _ from 'lodash';
 export class Chromosome{
   label: string | number;
   recombination : boolean;
@@ -17,14 +17,20 @@ export class Chromosome{
       let babyGenes = [];
       for(let i in chromatid.genes){
         if(0 < (Math.random() - .5)){
-          babyGenes.push(JSON.parse(JSON.stringify(chromatid.genes[i])));
+          babyGenes.push(_.cloneDeep(chromatid.genes[i]));
         }else{
-          babyGenes.push(JSON.parse(JSON.stringify(this.genes[i])));
+          babyGenes.push(_.cloneDeep(this.genes[i]));
         }
       }
       return new Chromosome(babyGenes, (this.label))
     }else {
       return this;
+    }
+  }
+
+  randomize(){
+    for(let i in this.genes){
+      this.genes[i].mutate();
     }
   }
 

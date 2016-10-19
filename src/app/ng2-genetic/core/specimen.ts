@@ -7,4 +7,10 @@ export class Specimen{
     this.dna = dna;
     this.fitness = fitness;
   }
+
+  randomize(): any {
+    for(let i in this.dna){
+      this.dna[i].randomize();
+    }
+  }
 }

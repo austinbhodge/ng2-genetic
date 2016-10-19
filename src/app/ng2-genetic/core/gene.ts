@@ -5,7 +5,7 @@ export class Gene{
   mutationRate : number;
   attributes : any[];
 
-  constructor(name: string, attributes: any[], mutationConstant = 1, essential = true) {
+  constructor(attributes: any[], name?: string, mutationConstant = 1, essential = true) {
     this.name = name;
     this.attributes = attributes;
     this.mutationConstant = mutationConstant;

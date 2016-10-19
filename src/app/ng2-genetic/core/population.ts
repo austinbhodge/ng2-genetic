@@ -1,4 +1,6 @@
 import { Specimen } from './';
+import { Observable } from 'rxjs';
+import * as _ from "lodash";
 
 export class Population{
   generation: number = 0;
@@ -10,18 +12,41 @@ export class Population{
   mutationRatio : number;
   optimizeMax : boolean;
 
-  constructor(members : Specimen[], fitnessFunction : Function, maxMembers = 100, survivalRatio = 0.5, mutationRatio = 0.2, crossoverRatio = 0.5, optimizeMax = true){
-    this.members = members;
+  constructor(fitnessFunction : Function, maxMembers = 100, survivalRatio = 0.5, mutationRatio = 0.2, crossoverRatio = 0.5, optimizeMax = true){
+    this.members = [];
     this.fitnessFunction = fitnessFunction;
     this.survivalRatio = survivalRatio;
+    this.mutationRatio = 0.2
+    this.crossoverRatio = crossoverRatio;
     this.optimizeMax = optimizeMax;
+    this.maxMembers = maxMembers;
+  }
+  evolve(timeout){
+    return Observable.create(observer => {
+      for(let i = 0; i < timeout; i++){
+        this.populationFitness();
+        this.selection();
+        this.populationCrossover();
+        observer.next(this.members);
+      }
+    });
   }
 
   selection(){
-    let amtLived = Math.floor(this.survivalRatio * this.members.length);
-    let survivors = JSON.parse(JSON.stringify(this.members.splice(amtLived, (this.members.length - 1))));
+    let amtLived = Math.floor(this.survivalRatio * this.members.length) - 1;
+    let survivors = [];
+    for(let i in (this.members.splice(amtLived, (this.members.length - 1)))){
+      survivors.push(_.cloneDeep(this.members[i]));
+    }
     delete this.members;
     this.members = survivors;
+  }
+
+  seed(seed : Specimen){
+    for(let i = 0; i <= this.maxMembers; i++){
+      seed.randomize();
+      this.members.push(_.cloneDeep(seed));
+    }
   }
 
   // Calculates & Sorts each members' fitness
@@ -49,8 +74,12 @@ export class Population{
 
   // Calculates a member's fitness
   memberFitness(member : Specimen){
-    member.fitness = this.fitnessFunction(member);
-    return member.fitness;
+    if(member != undefined){
+      member.fitness = this.fitnessFunction(member);
+      return member.fitness;
+    }else{
+      return 0;
+    }
   }
 
   memberCrossover(mother : Specimen, father : Specimen){
